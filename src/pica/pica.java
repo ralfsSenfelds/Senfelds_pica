@@ -16,9 +16,18 @@ public class pica {
         else
             JOptionPane.showMessageDialog(null, "Neesat izveidojis profilu");
     }
+    
+    static void izietProfila() {
+    	if(reg == true) {
+    		reg = false;
+    		JOptionPane.showMessageDialog(null, "Veiksmigi iziets no profila");
+    	}else {
+    		JOptionPane.showMessageDialog(null, "Kluda");
+    	}
+    }
 
     public static void main(String[] args) {
-        String[] izv1 = {"Reģistrēt profilu", "Pieslēgties profilam", "Aizvert programmu"};
+        String[] izv1 = {"Reģistrēt profilu", "Pieslēgties profilam", "Iziet no profila", "Aizvert programmu"};
         String[] izv2 = {"Izveidot picu", "Pasūtīt picu", "Apskatīt picu vēsturi", "Apskatīt čeku vēsturi"};
         
         int izvele;
@@ -33,9 +42,12 @@ public class pica {
                     pieProfilam();
                     break;
                 case 2:
+                    izietProfila();
+                    break;
+                case 3:
                     JOptionPane.showMessageDialog(null, "Visu labu!");
                     break;
             }
-        } while (izvele != 2);
+        } while (izvele != 3);
     }
 }
