@@ -1,7 +1,5 @@
 package Pica;
 
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -12,71 +10,50 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
 
 public class PicaApplication {
-    static boolean isRegistered = false;
 
-    public static HashMap<String, String> getCredentials(JFrame frame) {
-        HashMap<String, String> credentials = new HashMap<String, String>();
+	HashMap<String, String> credentials = getCredential.getCredentials();
+	String username = credentials.get("Lietotājs");
+	String password = credentials.get("Parole");
 
-        JPanel panel = new JPanel(new BorderLayout(5, 5));
-
-        JPanel label = new JPanel(new GridLayout(0, 1, 2, 2));
-        label.add(new JLabel("Lietotājs", SwingConstants.RIGHT));
-        label.add(new JLabel("Parole", SwingConstants.RIGHT));
-        panel.add(label, BorderLayout.WEST);
-
-        JPanel controls = new JPanel(new GridLayout(0, 1, 2, 2));
-        JTextField username = new JTextField();
-        controls.add(username);
-        JPasswordField password = new JPasswordField();
-        controls.add(password);
-        panel.add(controls, BorderLayout.CENTER);
-
-        JOptionPane.showMessageDialog(frame, panel, "Pieslēgties", JOptionPane.QUESTION_MESSAGE);
-
-        credentials.put("Lietotājs", username.getText());
-        credentials.put("Parole", new String(password.getPassword()));
-        return credentials;
-    }
-
-    public static boolean registerProfile(boolean isNewRegistration) {
-        HashMap<String, String> credentials = getCredentials(null);
-        try {
-            FileWriter myWriter = new FileWriter("userInfo.txt");
-            myWriter.write(credentials.get("Lietotājs") + "," + credentials.get("Parole"));
-            myWriter.close();
-            System.out.println("Dati veiksmīgi saglabāti.");
-            JOptionPane.showMessageDialog(null, "Jūs esat veiksmīgi reģistrējies!");
-            return true;
-        } catch (IOException e) {
-            System.out.println("Ieraksta kļūda.");
-            e.printStackTrace();
+    public static boolean registerProfile() {
+    	HashMap<String, String> credentials = getCredential.getCredentials();
+        List<Map<String, String>> savedCredentialsList = readUserInfo();
+        boolean isUsernameTaken = savedCredentialsList.stream()
+                .anyMatch(savedCredentials -> savedCredentials.get("Lietotājs").equals(credentials.get("Lietotājs")));
+        if (isUsernameTaken) {
+            JOptionPane.showMessageDialog(null, "Lietotājvārds jau ir aizņemts. Lūdzu, izvēlieties citu lietotājvārdu.");
             return false;
+        } else {
+        	savedCredentialsList.add(credentials);
+        	try (FileWriter myWriter = new FileWriter("userInfo.txt", true)) {
+                myWriter.write(credentials.get("Lietotājs") + "," + credentials.get("Parole") + "\n");
+                System.out.println("Dati veiksmīgi saglabāti.");
+                JOptionPane.showMessageDialog(null, "Jūs esat veiksmīgi reģistrējies!");
+                return true;
+            } catch (IOException e) {
+                System.out.println("Ieraksta kļūda.");
+                e.printStackTrace();
+                return false;
+            }
         }
     }
 
-
     public static List<Map<String, String>> readUserInfo() {
         List<Map<String, String>> credentialsList = new ArrayList<>();
-        try {
-            File myObj = new File("userInfo.txt");
-            Scanner myReader = new Scanner(myObj);
+        try (Scanner myReader = new Scanner(new File("userInfo.txt"))) {
             while (myReader.hasNextLine()) {
-                String data = myReader.nextLine();
+                String data = myReader.nextLine().trim();
+                if (!data.isEmpty()) {
                 String[] arr = data.split(",");
                 Map<String, String> credentials = new HashMap<>();
                 credentials.put("Lietotājs", arr[0]);
                 credentials.put("Parole", arr[1]);
                 credentialsList.add(credentials);
+                }
             }
-            myReader.close();
         } catch (FileNotFoundException e) {
             System.out.println("Fails nav atrasts.");
             e.printStackTrace();
@@ -85,54 +62,77 @@ public class PicaApplication {
     }
 
     public static void login(JFrame frame) {
-        HashMap<String, String> credentials = getCredentials(frame);
-        HashMap<String, String> savedCredentials = readUserInfo();
-        if (credentials.get("Lietotājs").equals(savedCredentials.get("Lietotājs")) &&
+    	HashMap<String, String> credentials = getCredential.getCredentials();
+        List<Map<String, String>> savedCredentialsList = readUserInfo();
+        boolean foundMatch = false;
+        for (Map<String, String> savedCredentials : savedCredentialsList) {
+            if (credentials.get("Lietotājs").equals(savedCredentials.get("Lietotājs")) &&
                 credentials.get("Parole").equals(savedCredentials.get("Parole"))) {
-            JOptionPane.showMessageDialog(frame,
-                       "Pieslēgšanās veiksmīga!");
-            isRegistered = true;
+                foundMatch = true;
+                break;
+            }
+        }
+        if (foundMatch) {
+            JOptionPane.showMessageDialog(frame, "Pieslēgšanās veiksmīga!");
+            showLoggedInMenu(frame);
         } else {
-            JOptionPane.showMessageDialog(frame,
-                       "Lietotājs vai parole nav pareiza!");
-            isRegistered = false;
+            JOptionPane.showMessageDialog(frame, "Lietotājs vai parole nav pareiza!");
         }
     }
 
     static void logout() {
-        if (isRegistered == true) {
-            isRegistered = false;
-            JOptionPane.showMessageDialog(null,
-                       "Jūs esat veiksmīgi izgājuši no profila.");
+            JOptionPane.showMessageDialog(null, "Jūs esat veiksmīgi izgājuši no profila.");
+    }
+    
+    public static void showLoggedInMenu(JFrame frame) {
+        String[] izv2 = {"Izveidot picu", "Pasūtīt picu", "Apskatīt picu vēsturi", "Apskatīt čeku vēsturi", "Iziet no profila"};
+        int izvele = JOptionPane.showOptionDialog(frame, null, "Picas izvēlne", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, izv2, izv2[0]);
+        if (izvele == -1) {
+            logout();
         } else {
-               JOptionPane.showMessageDialog(null,
-                               "Kluda");
-       }
+            switch (izvele) {
+                case 0:
+                    
+                    break;
+                case 1:
+                    
+                    break;
+                case 2:
+                    
+                    break;
+                case 3:
+                    
+                    break;
+                case 4:
+                	logout();
+                	break;
+                default:
+                    JOptionPane.showMessageDialog(frame, "Nepareiza izvēle!");
+                    break;
+            }
+        }
     }
 
     public static void main(String[] args) {
-        String[] izv1 = {"Reģistrēt profilu", "Pieslēgties profilam", "Iziet no profila", "Aizvert programmu"};
+        String[] izv1 = {"Reģistrēt profilu", "Pieslēgties profilam", "Aizvert programmu"};
         int izvele;
         do {
             izvele = JOptionPane.showOptionDialog(null,
                        "Laipni lūgti picas aplikācijā! ", "Opcijas", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, izv1, izv1[0]);
             switch (izvele) {
                 case 0:
-                    registerProfile(true);
+                    registerProfile();
                     break;
                 case 1:
                     login(null);
                     break;
                 case 2:
-                    logout();
-                    break;
-                case 3:
                     JOptionPane.showMessageDialog(null, "Visu labu!");
                     break;
                 default:
                     JOptionPane.showMessageDialog(null, "Nepareiza izvēle!");
                     break;
             }
-        } while (izvele != 3);
+        } while (izvele != 2);
     }
 }
