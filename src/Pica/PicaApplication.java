@@ -6,7 +6,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Scanner;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -18,9 +18,9 @@ import javax.swing.SwingConstants;
 
 public class PicaApplication {
     static boolean isRegistered = false;
-    
-    public static Hashtable<String, String> getCredentials(JFrame frame) {
-        Hashtable<String, String> credentials = new Hashtable<String, String>();
+
+    public static HashMap<String, String> getCredentials(JFrame frame) {
+        HashMap<String, String> credentials = new HashMap<String, String>();
 
         JPanel panel = new JPanel(new BorderLayout(5, 5));
 
@@ -44,7 +44,7 @@ public class PicaApplication {
     }
 
     public static boolean registerProfile(boolean isNewRegistration) {
-        Hashtable<String, String> credentials = getCredentials(null);
+        HashMap<String, String> credentials = getCredentials(null);
         JOptionPane.showMessageDialog(null, "Jūs esat veiksmīgi reģistrējies!");
         try {
             FileWriter myWriter = new FileWriter("userInfo.txt");
@@ -59,8 +59,9 @@ public class PicaApplication {
         return true;
     }
 
-    public static Hashtable<String, String> readUserInfo() {
-        Hashtable<String, String> credentials = new Hashtable<String, String>();
+
+    public static HashMap<String, String> readUserInfo() {
+        HashMap<String, String> credentials = new HashMap<String, String>();
         try {
             File myObj = new File("userInfo.txt");
             Scanner myReader = new Scanner(myObj);
@@ -79,39 +80,37 @@ public class PicaApplication {
     }
 
     public static void login(JFrame frame) {
-        Hashtable<String, String> credentials = getCredentials(frame);
-        Hashtable<String, String> savedCredentials = readUserInfo();
+        HashMap<String, String> credentials = getCredentials(frame);
+        HashMap<String, String> savedCredentials = readUserInfo();
         if (credentials.get("Lietotājs").equals(savedCredentials.get("Lietotājs")) &&
                 credentials.get("Parole").equals(savedCredentials.get("Parole"))) {
             JOptionPane.showMessageDialog(frame,
-            		"Pieslēgšanās veiksmīga!");
+                       "Pieslēgšanās veiksmīga!");
             isRegistered = true;
         } else {
             JOptionPane.showMessageDialog(frame,
-            		"Lietotājs vai parole nav pareiza!");
+                       "Lietotājs vai parole nav pareiza!");
             isRegistered = false;
         }
     }
-    
+
     static void logout() {
         if (isRegistered == true) {
             isRegistered = false;
             JOptionPane.showMessageDialog(null,
-            		"Jūs esat veiksmīgi izgājuši no profila.");
+                       "Jūs esat veiksmīgi izgājuši no profila.");
         } else {
-    		JOptionPane.showMessageDialog(null,
-    				"Kluda");
-    	}
+               JOptionPane.showMessageDialog(null,
+                               "Kluda");
+       }
     }
 
     public static void main(String[] args) {
         String[] izv1 = {"Reģistrēt profilu", "Pieslēgties profilam", "Iziet no profila", "Aizvert programmu"};
-        String[] izv2 = {"Izveidot picu", "Pasūtīt picu", "Apskatīt picu vēsturi", "Apskatīt čeku vēsturi"};
-        
         int izvele;
         do {
             izvele = JOptionPane.showOptionDialog(null,
-            		"Laipni lūgti picas aplikācijā! ", "Opcijas", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, izv1, izv1[0]);
+                       "Laipni lūgti picas aplikācijā! ", "Opcijas", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, izv1, izv1[0]);
             switch (izvele) {
                 case 0:
                     registerProfile(true);
