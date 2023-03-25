@@ -6,7 +6,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -45,38 +48,40 @@ public class PicaApplication {
 
     public static boolean registerProfile(boolean isNewRegistration) {
         HashMap<String, String> credentials = getCredentials(null);
-        JOptionPane.showMessageDialog(null, "Jūs esat veiksmīgi reģistrējies!");
         try {
             FileWriter myWriter = new FileWriter("userInfo.txt");
             myWriter.write(credentials.get("Lietotājs") + "," + credentials.get("Parole"));
             myWriter.close();
             System.out.println("Dati veiksmīgi saglabāti.");
+            JOptionPane.showMessageDialog(null, "Jūs esat veiksmīgi reģistrējies!");
+            return true;
         } catch (IOException e) {
             System.out.println("Ieraksta kļūda.");
             e.printStackTrace();
             return false;
         }
-        return true;
     }
 
 
-    public static HashMap<String, String> readUserInfo() {
-        HashMap<String, String> credentials = new HashMap<String, String>();
+    public static List<Map<String, String>> readUserInfo() {
+        List<Map<String, String>> credentialsList = new ArrayList<>();
         try {
             File myObj = new File("userInfo.txt");
             Scanner myReader = new Scanner(myObj);
             while (myReader.hasNextLine()) {
                 String data = myReader.nextLine();
                 String[] arr = data.split(",");
+                Map<String, String> credentials = new HashMap<>();
                 credentials.put("Lietotājs", arr[0]);
                 credentials.put("Parole", arr[1]);
+                credentialsList.add(credentials);
             }
             myReader.close();
         } catch (FileNotFoundException e) {
             System.out.println("Fails nav atrasts.");
             e.printStackTrace();
         }
-        return credentials;
+        return credentialsList;
     }
 
     public static void login(JFrame frame) {
