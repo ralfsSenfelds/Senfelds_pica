@@ -1,22 +1,55 @@
 package Pica;
 
-class Checkout {
-    public static void main(String[] args) {
-        Pizza margherita = new Pizza("Margherita", 9.99);
-        Pizza pepperoni = new Pizza("Pepperoni", 11.99);
-        Pizza veggie = new Pizza("Veggie", 12.99);
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
 
-        Order order = new Order();
-        order.addPizza(margherita);
-        order.addPizza(pepperoni);
+class Item {
+    String name;
+    int quantity;
+    double price;
 
-        System.out.println("Your order:");
-        for (Pizza pizza : order.getPizzas()) {
-            System.out.println(pizza.getName() + ": $" + pizza.getPrice());
+    public Item(String name, int quantity, double price) {
+        this.name = name;
+        this.quantity = quantity;
+        this.price = price;
+    }
+
+    public double getTotalPrice() {
+        return quantity * price;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+}
+
+public class Checkout {
+    public static String generateReceipt(ArrayList<Item> items) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("PIRKUMA CEKS\n\n");
+
+        double sum = 0;
+        for (Item item : items) {
+            sb.append(item.name).append("\n");
+            sb.append("\t").append(item.quantity).append(" gab. x ").append(item.price).append("\t\n");
+            sum += item.getTotalPrice();
         }
-        System.out.println("Total: $" + order.getTotal());
 
-        String receipt = order.generateReceipt();
-        System.out.println(receipt);
+        BigDecimal subtotal = new BigDecimal(sum);
+        BigDecimal vatRate = new BigDecimal("0.21");
+        BigDecimal vatAmount = subtotal.multiply(vatRate);
+        BigDecimal total = subtotal.add(vatAmount);
+
+        sb.append("_____________________\n");
+        sb.append("Summa bez PVN: ").append(subtotal.setScale(2, RoundingMode.HALF_UP)).append("\n");
+        sb.append("PVN:           ").append(vatAmount.setScale(2, RoundingMode.HALF_UP)).append("\n");
+        sb.append("KOPA:          ").append(total.setScale(2, RoundingMode.HALF_UP)).append(" EUR\n");
+
+        return sb.toString();
     }
 }
