@@ -1,5 +1,7 @@
 package Pica;
 
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -9,17 +11,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import javax.swing.ButtonGroup;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 
 public class PicaApplication {
 
-	HashMap<String, String> credentials = getCredential.getCredentials();
+	HashMap<String, String> credentials = Credentials.getCredentials();
 	String username = credentials.get("Lietotājs");
 	String password = credentials.get("Parole");
 
     public static boolean registerProfile() {
-    	HashMap<String, String> credentials = getCredential.getCredentials();
+    	HashMap<String, String> credentials = Credentials.getCredentials();
         List<Map<String, String>> savedCredentialsList = readUserInfo();
         boolean isUsernameTaken = savedCredentialsList.stream()
                 .anyMatch(savedCredentials -> savedCredentials.get("Lietotājs").equals(credentials.get("Lietotājs")));
@@ -62,7 +69,7 @@ public class PicaApplication {
     }
 
     public static void login(JFrame frame) {
-    	HashMap<String, String> credentials = getCredential.getCredentials();
+    	HashMap<String, String> credentials = Credentials.getCredentials();
         List<Map<String, String>> savedCredentialsList = readUserInfo();
         boolean foundMatch = false;
         for (Map<String, String> savedCredentials : savedCredentialsList) {
@@ -92,7 +99,29 @@ public class PicaApplication {
         } else {
             switch (izvele) {
                 case 0:
+                	JPanel panel = new JPanel(new BorderLayout(5, 5));
+                    panel.add(new JLabel("Izvēlieties picas izmēru: "), BorderLayout.NORTH);
                     
+                    String[] sizes = {"Maza (25 cm)", "Vidēja (35 cm)", "Liela (45 cm)"};
+                    JPanel radioButtonsPanel = new JPanel(new GridLayout(0, 1));
+                    ButtonGroup sizeGroup = new ButtonGroup();
+                    for (int i = 0; i < sizes.length; i++) {
+                        JRadioButton radioButton = new JRadioButton(sizes[i]);
+                        radioButtonsPanel.add(radioButton);
+                        sizeGroup.add(radioButton);
+                    }
+                    panel.add(radioButtonsPanel, BorderLayout.CENTER);
+                    
+                    String[] toppings = {"Siers", "Pepperoni", "Sēnes", "Tomāti", "Sarkanā paprika"};
+                    JPanel checkboxPanel = new JPanel(new GridLayout(0, 1));
+                    for (int i = 0; i < toppings.length; i++) {
+                        JCheckBox checkBox = new JCheckBox(toppings[i]);
+                        checkboxPanel.add(checkBox);
+                    }
+                    panel.add(checkboxPanel, BorderLayout.EAST);
+                    
+                    JOptionPane.showOptionDialog(frame, panel, "Izveidot picu", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
+                    showLoggedInMenu(frame);
                     break;
                 case 1:
                     
@@ -114,11 +143,13 @@ public class PicaApplication {
     }
 
     public static void main(String[] args) {
-        String[] izv1 = {"Reģistrēt profilu", "Pieslēgties profilam", "Aizvert programmu"};
+        String[] izv1 = {"Reģistrēt profilu", "Pieslēgties profilam", "Aizvērt programmu"};
         int izvele;
         do {
+            JLabel label = new JLabel("Laipni lūgti picas aplikācijā!");
+            label.setHorizontalAlignment(JLabel.CENTER);
             izvele = JOptionPane.showOptionDialog(null,
-                       "Laipni lūgti picas aplikācijā! ", "Opcijas", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, izv1, izv1[0]);
+                       label, "Opcijas", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, izv1, izv1[0]);
             switch (izvele) {
                 case 0:
                     registerProfile();

@@ -9,7 +9,7 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-public class getCredential {
+public class Credentials {
 	public static HashMap<String, String> getCredentials() {
 	    JTextField usernameField = new JTextField(20);
 	    JPasswordField passwordField = new JPasswordField(20);
