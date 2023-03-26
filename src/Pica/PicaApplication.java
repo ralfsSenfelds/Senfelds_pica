@@ -76,7 +76,7 @@ public class PicaApplication {
             }
         }
         if (foundMatch) {
-            JOptionPane.showMessageDialog(frame, "Pieslēgšanās veiksmīga!");
+            JOptionPane.showMessageDialog(frame, "Pieslēgšanās veiksmīga!", "Paziņojums", JOptionPane.INFORMATION_MESSAGE);
             showLoggedInMenu(frame, new ArrayList<Item>());
         } else {
             JOptionPane.showMessageDialog(frame, "Lietotājs vai parole nav pareiza!");
@@ -84,7 +84,7 @@ public class PicaApplication {
     }
     
     public static void showLoggedInMenu(JFrame frame, ArrayList<Item> items) {
-        String[] izv2 = {"Izveidot picu", "Pasūtīt picu", "Apskatīt picu vēsturi", "Apskatīt čeku vēsturi", "Iziet no profila"};
+        String[] izv2 = {"Izveidot picu", "Pasūtīt picu", "", "", "Iziet no profila"};
         int izvele = JOptionPane.showOptionDialog(frame, null, "Picas izvēlne", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, izv2, izv2[0]);
             switch (izvele) {
             case 0:
@@ -92,17 +92,11 @@ public class PicaApplication {
             	 showLoggedInMenu(frame, items);
             break;
             case 1:
-            	 if (items == null) {
-            	        JOptionPane.showMessageDialog(frame, "Nav izvēlēts neviens produkts!");
-            	        showLoggedInMenu(frame, items);
-            	    } else {
-            	        String receipt = Checkout.generateReceipt(items);
-            	        JOptionPane.showMessageDialog(null, receipt, "Pirkuma čeks", JOptionPane.INFORMATION_MESSAGE);
-            	        showLoggedInMenu(frame, items);
-            	    }
+                 Item.generateReceipt(items);
+                 showLoggedInMenu(frame, items);
             break;
             case 2:
-                    
+                 
             break;
             case 3:
                     

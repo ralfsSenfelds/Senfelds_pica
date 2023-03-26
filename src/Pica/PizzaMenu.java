@@ -74,7 +74,6 @@ public class PizzaMenu {
 
             Item pizza = new Item(size + " pica ar " + String.join(", ", selectedToppings), 1, pizzaPrice);
             items.add(pizza);
-            System.out.println("Pasūtījums: " + pizza.getName() + " Cena: " + pizza.getPrice());
         }
     }
 }
