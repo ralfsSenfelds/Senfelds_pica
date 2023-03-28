@@ -1,13 +1,12 @@
 package Pica;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
@@ -15,8 +14,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
@@ -61,63 +58,40 @@ class Item {
 
     public static void generateReceipt(ArrayList<Item> items) {
     	JTable table = new JTable();
+        JPanel tablePanel = new JPanel(new BorderLayout());
+        tablePanel.add(new JScrollPane(table), BorderLayout.CENTER);
         table.setModel(new DefaultTableModel(
-            new Object[][] {},
-            new String[] {"Pica", "Daudzums"}));
-
-        JPanel summaryPanel = new JPanel(new GridLayout(3, 1));
-
-        table.getModel().addTableModelListener(new TableModelListener() {
-            @Override
-            public void tableChanged(TableModelEvent e) {
-                int row = e.getFirstRow();
-                int col = e.getColumn();
-                if (col == 1) {
-                	String value = table.getValueAt(row, col).toString();
-                    int newQuantity = Integer.parseInt(value);
-                    Item item = items.get(row);
-                    item.setQuantity(newQuantity);
-                    item.setTotalPrice(item.getPrice() * newQuantity);
-                    updateSummaryPanel(summaryPanel, items);
-                }
+                new Object[][]{},
+                new String[]{"Pica", "Skaits"}));
+        JPanel summaryPanel = new JPanel(new GridLayout(6, 1));
+        table.getModel().addTableModelListener(e -> {
+            int row = e.getFirstRow();
+            int col = e.getColumn();
+            if (col == 1) {
+                String value = table.getValueAt(row, col).toString();
+                int newQuantity = Integer.parseInt(value);
+                Item item = items.get(row);
+                item.setQuantity(newQuantity);
+                item.setTotalPrice(item.getPrice() * newQuantity);
+                updateSummaryPanel(summaryPanel, items);
             }
         });
 
         for (Item item : items) {
             Object[] row = {item.getName(), item.getQuantity()};
-            for (int i = 1; i < row.length; i++) {
-                if (row[i] instanceof Number) {
-                    row[i] = ((Number) row[i]).intValue();
-                } else if (row[i] instanceof String) {
-                    try {
-                        row[i] = Integer.parseInt((String) row[i]);
-                    } catch (NumberFormatException e) {
-                        row[i] = 0;
-                    }
-                } else {
-                    row[i] = 0;
-                }
-            }
-            ((DefaultTableModel)table.getModel()).addRow(row);
+            ((DefaultTableModel) table.getModel()).addRow(row);
         }
 
         table.setPreferredScrollableViewportSize(new Dimension(500, 200));
-
         TableColumnModel columnModel = table.getColumnModel();
         TableColumn column = columnModel.getColumn(0);
         column.setPreferredWidth(400);
-
         table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-        
         JFormattedTextField formattedTextField = new JFormattedTextField(NumberFormat.getIntegerInstance());
         DefaultCellEditor integerEditor = new DefaultCellEditor(formattedTextField) {
-           
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = 1L;
+            private static final long serialVersionUID = 1L;
 
-			@Override
+            @Override
             public Object getCellEditorValue() {
                 Object value = super.getCellEditorValue();
                 if (value instanceof Number) {
@@ -138,76 +112,81 @@ class Item {
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(new JScrollPane(table), BorderLayout.CENTER);
 
-        Object[] options = {"Piegāde", "Izņemšana"};
-        int deliveryChoice = JOptionPane.showOptionDialog(null, "Vai vēlaties pasūtījumu saņemt uz mājām vai izņemt uz vietas?",
-                "Pasūtījuma veids", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+        int result = JOptionPane.showOptionDialog(null, panel, "Pasūtījuma informācija",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null,
+                new String[]{"Labi", "Atcelt"}, "Labi");
 
-        BigDecimal deliveryCharge = new BigDecimal("0");
-        if (deliveryChoice == JOptionPane.YES_OPTION) {
-            deliveryCharge = new BigDecimal("5.99");
-        }
+        if (result == JOptionPane.OK_OPTION) {
+            Object[] options = {"Piegādāšana", "Izņemšana"};
+            int deliveryChoice = JOptionPane.showOptionDialog(null, "Vai vēlaties pasūtījumu saņemt uz mājām vai izņemt uz vietas?",
+                    "Pasūtījuma veids", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 
-        double sum = 0;
-        for (Item item : items) {
-            sum += item.getTotalPrice();
-        }
-
-        BigDecimal subtotal = new BigDecimal(sum);
-        BigDecimal vatRate = new BigDecimal("0.21");
-        BigDecimal vatAmount = subtotal.multiply(vatRate);
-        BigDecimal total = subtotal.add(vatAmount).add(deliveryCharge);
-
-        JLabel subtotalLabel = new JLabel("Bez PVN: " + subtotal.setScale(2, RoundingMode.HALF_UP) + " EUR");
-        JLabel vatLabel = new JLabel("PVN (" + vatRate.multiply(new BigDecimal("100")) + "%): " + vatAmount.setScale(2, RoundingMode.HALF_UP) + " EUR");
-    	JLabel totalLabel = new JLabel("KOPA: " + total.setScale(2, RoundingMode.HALF_UP) + "EUR");
-    	
-    	summaryPanel.add(subtotalLabel);
-    	summaryPanel.add(vatLabel);
-    	summaryPanel.add(totalLabel);
-
-    	JOptionPane.showMessageDialog(null, panel, "Pasutijuma apkopojums", JOptionPane.PLAIN_MESSAGE);
-    	JOptionPane.showMessageDialog(null, summaryPanel, "Pasutijums kopa", JOptionPane.PLAIN_MESSAGE);
-	}
-    
-    public static void updateSummaryPanel(JPanel summaryPanel, ArrayList<Item> items) {
-        JLabel subtotalLabel = (JLabel) summaryPanel.getComponent(0);
-        JLabel deliveryLabel = (JLabel) summaryPanel.getComponent(1);
-        JLabel vatLabel = (JLabel) summaryPanel.getComponent(2);
-        JLabel totalLabel = null;
-        for (Component c : summaryPanel.getComponents()) {
-            if (c instanceof JLabel) {
-                totalLabel = (JLabel) c;
-                break;
+            String deliveryType;
+            String address = "";
+            String phone = "";
+            if (deliveryChoice == JOptionPane.YES_OPTION) {
+                deliveryType = "Piegādāšana";
+                address = JOptionPane.showInputDialog(null, "Lūdzu, ievadiet savu adresi:");
+                phone = JOptionPane.showInputDialog(null, "Lūdzu, ievadiet savu telefona numuru:");
+            } else {
+                deliveryType = "Izņemšana";
             }
+
+            BigDecimal deliveryCharge = new BigDecimal(0);
+            BigDecimal subtotal = new BigDecimal(0);
+            for (Item item : items) {
+                BigDecimal itemPrice = new BigDecimal(Double.toString(item.getPrice()));
+                BigDecimal itemQuantity = new BigDecimal(Integer.toString(item.getQuantity()));
+                BigDecimal itemTotalPrice = itemPrice.multiply(itemQuantity);
+                subtotal = subtotal.add(itemTotalPrice);
+            }
+            BigDecimal total;
+            if (deliveryChoice == JOptionPane.YES_OPTION) {
+                deliveryCharge = new BigDecimal("5.99");
+                total = subtotal.add(deliveryCharge);
+            } else {
+                total = subtotal;
+            }
+
+            NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.GERMANY);
+            String formattedSubtotal = currencyFormat.format(subtotal);
+            String formattedDeliveryCharge = currencyFormat.format(deliveryCharge);
+            BigDecimal pvn = subtotal.multiply(new BigDecimal("0.21"));
+            BigDecimal totalWithPvn = total.add(pvn);
+            String formattedPvn = currencyFormat.format(pvn);
+            String formattedTotalWithPvn = currencyFormat.format(totalWithPvn);
+            JOptionPane.showMessageDialog(null,
+                "Pasūtījuma veids: " + deliveryType + "\n\n" +
+                "Adrese: " + address + "\n" +
+                "Telefona numurs: " + phone + "\n\n" +
+                "Bez PVN: " + formattedSubtotal + "\n" +
+                "PVN: " + formattedPvn + "\n" +
+                "Piegādes maksa: " + formattedDeliveryCharge + "\n" +
+                "Kopā: " + formattedTotalWithPvn,
+                "Pasūtījuma kvīts", JOptionPane.INFORMATION_MESSAGE);
         }
-        totalLabel.setText(String.format("Total: $%.2f", getTotal(null)));
-        subtotalLabel.setText("bez PVN: " + getSubtotal(items) + "EUR");
-        deliveryLabel.setText("Piegāde: " + "5.99" + "EUR");
-        vatLabel.setText("PVN: " + getVatAmount(items) + "EUR");
-        totalLabel.setText("KOPA: " + getTotal(items) + "EUR");
-    }
-    
-    public static double getSubtotal(ArrayList<Item> items) {
-        double subtotal = 0;
-        if (items == null || items.isEmpty()) {
-            return subtotal;
-        }
-        for (Item item : items) {
-            subtotal += item.getTotalPrice();
-        }
-        return subtotal;
-}
-    public static double getVatAmount(ArrayList<Item> items) {
-        double subtotal = getSubtotal(items);
-        double vatRate = 0.21;
-        double vatAmount = subtotal * vatRate;
-        return vatAmount;
     }
 
-    public static double getTotal(ArrayList<Item> items) {
-        double subtotal = getSubtotal(items);
-        double vatAmount = getVatAmount(items);
-        double total = subtotal + vatAmount;
-        return total;
+    private static void updateSummaryPanel(JPanel summaryPanel, ArrayList<Item> items) {
+        summaryPanel.removeAll();
+        summaryPanel.add(new JLabel("Pasūtījuma kopsavilkums"));
+        summaryPanel.add(new JLabel(""));
+
+        int totalQuantity = 0;
+        BigDecimal subtotal = new BigDecimal(0);
+        for (Item item : items) {
+            totalQuantity += item.getQuantity();
+            BigDecimal itemPrice = new BigDecimal(Double.toString(item.getPrice()));
+            BigDecimal itemQuantity = new BigDecimal(Integer.toString(item.getQuantity()));
+            BigDecimal itemTotalPrice = itemPrice.multiply(itemQuantity);
+            subtotal = subtotal.add(itemTotalPrice);
+            summaryPanel.add(new JLabel(item.getName() + " (" + item.getQuantity() + " x " +
+                    NumberFormat.getCurrencyInstance().format(item.getPrice()) + "): " +
+                    NumberFormat.getCurrencyInstance().format(itemTotalPrice)));
+        }
+
+        summaryPanel.add(new JLabel(""));
+        summaryPanel.add(new JLabel("Kopējais daudzums: " + totalQuantity));
+        summaryPanel.add(new JLabel("Bez PVN: " + NumberFormat.getCurrencyInstance().format(subtotal)));
     }
-}
+}    
