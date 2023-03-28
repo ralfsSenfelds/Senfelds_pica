@@ -84,7 +84,7 @@ public class PicaApplication {
     }
     
     public static void showLoggedInMenu(JFrame frame, ArrayList<Item> items) {
-        String[] izv2 = {"Izveidot picu", "Pasūtīt picu", "", "", "Iziet no profila"};
+        String[] izv2 = {"Izveidot picu", "Pasūtīt picu", "", "Izdzēst pasūtījumu", "Iziet no profila"};
         int izvele = JOptionPane.showOptionDialog(frame, null, "Picas izvēlne", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, izv2, izv2[0]);
             switch (izvele) {
             case 0:
@@ -92,14 +92,24 @@ public class PicaApplication {
             	 showLoggedInMenu(frame, items);
             break;
             case 1:
-                 Item.generateReceipt(items);
-                 showLoggedInMenu(frame, items);
+            	if (items.size() > 0) {
+                    Item.generateReceipt(items);
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Jums nav izveidotas picas!", "Kļūda", JOptionPane.ERROR_MESSAGE);
+                }
+                showLoggedInMenu(frame, items);
             break;
             case 2:
-                 
-            break;
+                
+                break;
             case 3:
-                    
+            	if (items.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Jums nav pasūtījuma ko izdzēst", "Kļūda", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    items.clear();
+                    JOptionPane.showMessageDialog(null, "Pasūtījums izdzēsts", "Paziņojums", JOptionPane.INFORMATION_MESSAGE);
+                }
+                showLoggedInMenu(frame, items);
             break;
             case 4:
                 return;

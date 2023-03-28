@@ -60,21 +60,21 @@ class Item {
     }
 
     public static void generateReceipt(ArrayList<Item> items) {
-        JTable table = new JTable();
+    	JTable table = new JTable();
         table.setModel(new DefaultTableModel(
             new Object[][] {},
-            new String[] {"Pica", "Daudzums", "Cena"}));
-        
+            new String[] {"Pica", "Daudzums"}));
+
         JPanel summaryPanel = new JPanel(new GridLayout(3, 1));
-        
+
         table.getModel().addTableModelListener(new TableModelListener() {
             @Override
             public void tableChanged(TableModelEvent e) {
                 int row = e.getFirstRow();
                 int col = e.getColumn();
-                if (col == 1) { 
-                	String value = (String) table.getValueAt(row, col);
-                	int newQuantity = Integer.parseInt(value);
+                if (col == 1) {
+                	String value = table.getValueAt(row, col).toString();
+                    int newQuantity = Integer.parseInt(value);
                     Item item = items.get(row);
                     item.setQuantity(newQuantity);
                     item.setTotalPrice(item.getPrice() * newQuantity);
@@ -84,7 +84,7 @@ class Item {
         });
 
         for (Item item : items) {
-            Object[] row = {item.getName(), item.getQuantity(), item.getPrice(), item.getTotalPrice()};
+            Object[] row = {item.getName(), item.getQuantity()};
             for (int i = 1; i < row.length; i++) {
                 if (row[i] instanceof Number) {
                     row[i] = ((Number) row[i]).intValue();
@@ -100,9 +100,9 @@ class Item {
             }
             ((DefaultTableModel)table.getModel()).addRow(row);
         }
-        
+
         table.setPreferredScrollableViewportSize(new Dimension(500, 200));
-        
+
         TableColumnModel columnModel = table.getColumnModel();
         TableColumn column = columnModel.getColumn(0);
         column.setPreferredWidth(400);
@@ -111,7 +111,8 @@ class Item {
         
         JFormattedTextField formattedTextField = new JFormattedTextField(NumberFormat.getIntegerInstance());
         DefaultCellEditor integerEditor = new DefaultCellEditor(formattedTextField) {
-            /**
+           
+			/**
 			 * 
 			 */
 			private static final long serialVersionUID = 1L;
@@ -132,7 +133,7 @@ class Item {
                 }
             }
         };
-        table.getColumnModel().getColumn(2).setCellEditor(integerEditor);
+        table.getColumnModel().getColumn(1).setCellEditor(integerEditor);
 
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(new JScrollPane(table), BorderLayout.CENTER);
