@@ -120,14 +120,17 @@ class Item {
             Object[] options = {"Piegādāšana", "Izņemšana"};
             int deliveryChoice = JOptionPane.showOptionDialog(null, "Vai vēlaties pasūtījumu saņemt uz mājām vai izņemt uz vietas?",
                     "Pasūtījuma veids", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-
             String deliveryType;
             String address = "";
             String phone = "";
             if (deliveryChoice == JOptionPane.YES_OPTION) {
                 deliveryType = "Piegādāšana";
+                do {
                 address = JOptionPane.showInputDialog(null, "Lūdzu, ievadiet savu adresi:");
+                }while(address.isBlank());
+                do {
                 phone = JOptionPane.showInputDialog(null, "Lūdzu, ievadiet savu telefona numuru:");
+                }while(phone.isBlank());
             } else {
                 deliveryType = "Izņemšana";
             }
@@ -158,7 +161,7 @@ class Item {
             JOptionPane.showMessageDialog(null,
                 "Pasūtījuma veids: " + deliveryType + "\n\n" +
                 "Adrese: " + address + "\n" +
-                "Telefona numurs: " + phone + "\n\n" +
+                "Telefona numurs: +371 " + phone + "\n\n" +
                 "Bez PVN: " + formattedSubtotal + "\n" +
                 "PVN: " + formattedPvn + "\n" +
                 "Piegādes maksa: " + formattedDeliveryCharge + "\n" +

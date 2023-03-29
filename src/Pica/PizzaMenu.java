@@ -3,10 +3,12 @@ package Pica;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -19,10 +21,14 @@ public class PizzaMenu {
     public static void pizzaBuilder(JFrame frame, ArrayList<Item> items) {
         JPanel panel = new JPanel(new BorderLayout(5, 5));
         panel.add(new JLabel("Izvēlieties picas izmēru: "), BorderLayout.NORTH);
-
+        JLabel temp = new JLabel(); temp.setIcon(new ImageIcon(((new ImageIcon(PicaApplication.class.getResource("picaLogo.png"))
+                .getImage()
+                .getScaledInstance(200, 200, java.awt.Image.SCALE_SMOOTH)))));
+        temp.setVisible(true);
         String[] sizes = {"Maza (25 cm)", "Vidēja (35 cm)", "Liela (45 cm)"};
         JPanel radioButtonsPanel = new JPanel(new GridLayout(0, 1));
         ButtonGroup sizeGroup = new ButtonGroup();
+        panel.add(temp, BorderLayout.WEST);
         for (int i = 0; i < sizes.length; i++) {
             JRadioButton radioButton = new JRadioButton(sizes[i]);
             radioButtonsPanel.add(radioButton);

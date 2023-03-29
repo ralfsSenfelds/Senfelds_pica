@@ -1,5 +1,6 @@
 package Pica;
 
+import java.awt.BorderLayout;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -9,9 +10,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 public class PicaApplication {
 	
@@ -30,7 +33,6 @@ public class PicaApplication {
 	        existingCredentials.add(credentials);
 	        try (FileWriter myWriter = new FileWriter("userInfo.txt", true)) {
 	            myWriter.write(credentials.get("Lietotājs") + "," + credentials.get("Parole") + "\n");
-	            System.out.println("Dati veiksmīgi saglabāti.");
 	            JOptionPane.showMessageDialog(null, "Jūs esat veiksmīgi reģistrējies!");
 	            return true;
 	        } catch (IOException e) {
@@ -84,8 +86,9 @@ public class PicaApplication {
     }
     
     public static void showLoggedInMenu(JFrame frame, ArrayList<Item> items) {
-        String[] izv2 = {"Izveidot picu", "Pasūtīt picu", "", "Izdzēst pasūtījumu", "Iziet no profila"};
-        int izvele = JOptionPane.showOptionDialog(frame, null, "Picas izvēlne", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, izv2, izv2[0]);
+        String[] izv2 = {"Izveidot picu", "Pasūtīt picu", "Izdzēst pasūtījumu", "Iziet no profila"};
+        ImageIcon icon = new ImageIcon(PicaApplication.class.getResource("picaBanner.png"));
+        int izvele = JOptionPane.showOptionDialog(frame, null, "Picas izvēlne", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, icon, izv2, izv2[0]);
             switch (izvele) {
             case 0:
             	 PizzaMenu.pizzaBuilder(frame, items);
@@ -100,9 +103,6 @@ public class PicaApplication {
                 showLoggedInMenu(frame, items);
             break;
             case 2:
-                
-                break;
-            case 3:
             	if (items.isEmpty()) {
                     JOptionPane.showMessageDialog(null, "Jums nav pasūtījuma ko izdzēst", "Kļūda", JOptionPane.ERROR_MESSAGE);
                 } else {
@@ -111,23 +111,21 @@ public class PicaApplication {
                 }
                 showLoggedInMenu(frame, items);
             break;
-            case 4:
+            case 3:
                 return;
-            default:
-                JOptionPane.showMessageDialog(frame, "Nepareiza izvēle!");
-            break;
             }
     }
 
     public static void main(String[] args) {
         String[] izv1 = {"Reģistrēt profilu", "Pieslēgties profilam", "Aizvērt programmu"};
-        int izvele;
+        int izvele = 0;
         do {
-            JLabel label = new JLabel("Laipni lūgti picas aplikācijā!");
-            label.setHorizontalAlignment(JLabel.CENTER);
-            izvele = JOptionPane.showOptionDialog(null,
-                       label, "Opcijas", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, izv1, izv1[0]);
-            switch (izvele) {
+        	JPanel panel = new JPanel(new BorderLayout());
+        	ImageIcon icon = new ImageIcon(PicaApplication.class.getResource("picaIntro.png"));
+        	JLabel label = new JLabel(icon);
+        	panel.add(label, BorderLayout.CENTER);
+        	izvele = JOptionPane.showOptionDialog(null, panel, "Opcijas", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, izv1, izv1[0]);
+        	switch (izvele) {
                 case 0:
                     registerProfile();
                 break;
